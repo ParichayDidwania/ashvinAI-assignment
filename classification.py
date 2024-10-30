@@ -4,7 +4,7 @@ from pdf2image import convert_from_path
 import json
 import pytesseract
 from langchain_community.document_loaders import PyPDFLoader
-from db import add_document
+from db import add_document, update_document_category_by_id
 
 def unzip_file(zip_path, extract_to):
     os.makedirs(extract_to, exist_ok=True)
@@ -48,6 +48,7 @@ def store_documents():
 def classify_documents(cursor, client):
     classified_documents = {}
     for row in cursor:
+        id = row.id
         content = row.content
         file_name = row.file_name
 
@@ -75,6 +76,8 @@ def classify_documents(cursor, client):
         response = client.generate(model=os.getenv('LLM_MODEL'), prompt=input_prompt)
         print(f"File Name: {file_name} | Classification: {response['response']}")
         classified_documents[file_name] = response['response']
+
+        update_document_category_by_id(id, response['response'])
 
     with open('classified_documents.json', 'w') as f:
         json.dump(classified_documents, f, indent=4)

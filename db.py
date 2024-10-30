@@ -23,6 +23,7 @@ class Document(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     file_name = Column(String, nullable=False)
     content = Column(String, nullable=False)
+    category = Column(String, nullable=True)
 
 def bootstrap_database():
     connection_successful = False
@@ -44,6 +45,15 @@ def add_document(content, file_name):
     new_doc = Document(content=content, file_name=file_name)
     
     session.add(new_doc)
+    session.commit()
+    session.close()
+
+def update_document_category_by_id(id, category):
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    
+    session.query(Document).filter(Document.id == id).update({Document.category: category})
+    
     session.commit()
     session.close()
 

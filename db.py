@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from sqlalchemy.orm import sessionmaker
 import os
+import time
 
 db_username = os.getenv('DB_USERNAME')
 db_password = os.getenv('DB_PASSWORD')
@@ -15,9 +16,7 @@ table_name = 'classification_files'
 DATABASE_URL = f'postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}'
 
 engine = create_engine(DATABASE_URL)
-
 Base = declarative_base()
-
 class Document(Base):
     __tablename__ = table_name
     
@@ -26,8 +25,17 @@ class Document(Base):
     content = Column(String, nullable=False)
 
 def bootstrap_database():
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
+    connection_successful = False
+
+    while not connection_successful:
+        try:
+            Base.metadata.drop_all(engine)
+            Base.metadata.create_all(engine)
+            connection_successful = True
+        except Exception as e:
+            print("Retrying database connection")
+            time.sleep(5)
+    
 
 def add_document(content, file_name):
     Session = sessionmaker(bind=engine)
@@ -39,12 +47,12 @@ def add_document(content, file_name):
     session.commit()
     session.close()
 
-def useCursorForExecution(fn):
+def useCursorForExecution(fn, client):
     Session = sessionmaker(bind=engine)
     session = Session()
 
     cursor = session.connection().execution_options(stream_results=True).execute(text(f"SELECT * FROM {table_name}"))
-    fn(cursor)
+    fn(cursor, client)
 
     session.commit()
     session.close()

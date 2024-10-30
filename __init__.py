@@ -9,5 +9,10 @@ from classification import store_documents, classify_documents
 store_documents()
 print('Documents Stored\n')
 
-useCursorForExecution(classify_documents)
+from ollama import Client
+import os
+
+client = Client(host=f"http://{os.getenv('OLLAMA_HOST')}:{os.getenv('OLLAMA_PORT')}")
+
+useCursorForExecution(classify_documents, client)
 print('Documents Classified')

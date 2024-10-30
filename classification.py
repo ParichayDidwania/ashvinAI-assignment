@@ -5,7 +5,6 @@ import json
 import pytesseract
 from langchain_community.document_loaders import PyPDFLoader
 from db import add_document
-import ollama
 
 def unzip_file(zip_path, extract_to):
     os.makedirs(extract_to, exist_ok=True)
@@ -46,7 +45,7 @@ def store_documents():
     unzip_file(zip_path, extract_to)
     load_pdfs(folder_path)
 
-def classify_documents(cursor):
+def classify_documents(cursor, client):
     classified_documents = {}
     for row in cursor:
         content = row.content
@@ -73,9 +72,8 @@ def classify_documents(cursor):
         Respond with **only** the **category name** and nothing else. 
         I will be using the provided name to map the **content** to the **category** thus, make sure the **category name** is exactly from one of the provided categories.
         """
-
-        response = ollama.generate(model=os.getenv('LLM_MODEL'), prompt=input_prompt)
-        print(f"File Name {file_name}, Classification: {response['response']}")
+        response = client.generate(model=os.getenv('LLM_MODEL'), prompt=input_prompt)
+        print(f"File Name: {file_name} | Classification: {response['response']}")
         classified_documents[file_name] = response['response']
 
     with open('classified_documents.json', 'w') as f:

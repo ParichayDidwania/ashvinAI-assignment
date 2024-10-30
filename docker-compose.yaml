@@ -1,0 +1,26 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: dockerfile
+    network_mode: host
+    environment:
+      - DB_USERNAME=ashvin_ai
+      - DB_PASSWORD=password
+      - DB_HOST=localhost
+      - DB_PORT=5433
+      - DB_NAME=ashvin_ai
+      - LLM_MODEL=llama3.2
+      - OLLAMA_HOST=host.docker.internal
+      - OLLAMA_PORT=11434
+      - PYTHONUNBUFFERED=1
+
+  db:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_DB: ashvin_ai
+      POSTGRES_USER: ashvin_ai       
+      POSTGRES_PASSWORD: password
+    network_mode: host
+    command: -p 5433

@@ -1,1 +1,3 @@
 # ashvinAI-assignment
+
+pdfinfo -v

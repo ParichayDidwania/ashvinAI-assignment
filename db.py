@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, Column, Integer, String, text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 import uuid
 from sqlalchemy.orm import sessionmaker
 import os
@@ -24,6 +24,7 @@ class Document(Base):
     file_name = Column(String, nullable=False)
     content = Column(String, nullable=False)
     category = Column(String, nullable=True)
+    images = Column(JSONB, nullable=True)
 
 def bootstrap_database():
     connection_successful = False
@@ -38,11 +39,11 @@ def bootstrap_database():
             time.sleep(5)
     
 
-def add_document(content, file_name):
+def add_document(content, file_name, images):
     Session = sessionmaker(bind=engine)
     session = Session()
     
-    new_doc = Document(content=content, file_name=file_name)
+    new_doc = Document(content=content, file_name=file_name, images=images)
     
     session.add(new_doc)
     session.commit()
